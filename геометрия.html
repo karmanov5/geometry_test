@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест по геометрии: Четырехугольники</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .katex-display {
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Начальный экран -->
+    <div id="start-container" class="bg-white w-full max-w-2xl rounded-2xl shadow-lg p-8 text-center">
+        <h2 class="text-3xl font-bold text-slate-800 mb-4">Тест по геометрии</h2>
+        <p class="text-lg text-slate-600 mb-6">Введите ваше имя и фамилию, чтобы начать.</p>
+        <div class="space-y-4 mb-8">
+            <input type="text" id="first-name" placeholder="Имя" class="w-full text-center text-lg border-2 border-slate-300 rounded-lg p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
+            <input type="text" id="last-name" placeholder="Фамилия" class="w-full text-center text-lg border-2 border-slate-300 rounded-lg p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
+            <p id="name-error" class="text-red-500 text-sm hidden">Пожалуйста, заполните оба поля.</p>
+        </div>
+        <button id="start-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-transform transform hover:scale-105">
+            Начать тест
+        </button>
+    </div>
+
+    <div id="quiz-container" class="bg-white w-full max-w-2xl rounded-2xl shadow-lg p-6 md:p-8 transition-all duration-300 hidden">
+        <!-- Заголовок и прогресс -->
+        <div id="quiz-header" class="mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <h1 class="text-2xl font-bold text-slate-800">Геометрия: Четырехугольники</h1>
+                 <div class="flex items-center space-x-3">
+                     <p id="timer" class="text-base font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full w-[70px] text-center tracking-wider"></p>
+                     <p id="progress-text" class="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Вопрос 1 из 20</p>
+                 </div>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2">
+                <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 5%;"></div>
+            </div>
+        </div>
+        
+        <!-- Область вопроса -->
+        <div id="question-area" class="mb-6">
+            <p id="question-text" class="text-lg text-slate-700 leading-relaxed min-h-[60px]"></p>
+        </div>
+
+        <!-- Область ответов -->
+        <div id="answer-area" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+            <!-- Кнопки/поля для ответов будут здесь -->
+        </div>
+        
+        <!-- Область с подсказкой и результатом ответа -->
+        <div id="feedback-area" class="min-h-[60px] flex flex-col justify-center">
+             <div id="hint-box" class="hidden cursor-pointer bg-slate-100 p-3 rounded-lg text-slate-600 text-sm">
+                <span class="font-semibold">💡 Подсказка:</span> <span id="hint-text"></span>
+            </div>
+            <div id="result-text" class="text-center font-semibold text-lg p-2 rounded-md"></div>
+        </div>
+
+        <!-- Кнопка "Далее" -->
+        <div class="mt-6 flex justify-end">
+            <button id="next-btn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-transform transform hover:scale-105 hidden">
+                Далее
+            </button>
+        </div>
+    </div>
+
+    <!-- Экран результатов -->
+    <div id="results-container" class="hidden bg-white w-full max-w-2xl rounded-2xl shadow-lg p-8 text-center">
+        <h2 id="user-name-result" class="text-3xl font-bold text-slate-800 mb-4">Результат</h2>
+        <div class="relative w-40 h-40 mx-auto mb-6 flex items-center justify-center">
+            <svg class="w-full h-full" viewBox="0 0 36 36">
+                <path class="stroke-current text-slate-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="4"></path>
+                <path id="result-circle" class="stroke-current text-blue-600" stroke-width="4" stroke-linecap="round" stroke-dasharray="0, 100" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+            </svg>
+            <span id="score-percentage" class="absolute text-4xl font-bold text-slate-800">0%</span>
+        </div>
+        <div class="flex justify-around items-center mb-8 bg-slate-50 p-4 rounded-lg">
+             <div>
+                <p class="text-slate-500 text-sm font-medium">БАЛЛЫ</p>
+                <p id="score-text" class="text-3xl font-bold text-slate-800">0/20</p>
+             </div>
+             <div>
+                <p class="text-slate-500 text-sm font-medium">ОЦЕНКА</p>
+                <p id="grade-text" class="text-3xl font-bold text-slate-800">-</p>
+             </div>
+        </div>
+        <p id="result-message" class="text-xl font-medium text-slate-700 mb-8"></p>
+        <p id="saving-status" class="text-sm text-slate-500 mb-4"></p>
+        <button id="restart-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-transform transform hover:scale-105">
+            Пройти еще раз
+        </button>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // !!! ВАЖНО: Вставьте сюда URL вашего веб-приложения Google Apps Script !!!
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhzY5vNdZUdmlhAu0BOM6mEEcBXl0-XFKTRL7w_vQRfRL2V3irpna5Q1VxgpI1f5BSKQ/exec'; // Например: 'https://script.google.com/macros/s/ВАШ_ID/exec'
+
+        const quizData = [
+            {
+                "questionNumber": 1,
+                "questionType": "FREE_RESPONSE",
+                "question": "Чему равна сумма углов выпуклого четырехугольника (в градусах)?",
+                "correctAnswers": ["360"],
+                "hint": "Попробуйте провести диагональ и посмотреть, на какие фигуры она делит четырехугольник.",
+                "rationale": "Любой выпуклый четырехугольник можно разделить диагональю на два треугольника, сумма углов в каждом из которых равна $180°$. Итого: $180° \\times 2 = 360°$."
+            },
+            {
+                "questionNumber": 2,
+                "question": "Четырехугольник, у которого противоположные стороны попарно параллельны, называется...",
+                "answerOptions": [
+                    { "text": "Трапеция", "isCorrect": false },
+                    { "text": "Прямоугольник", "isCorrect": false },
+                    { "text": "Параллелограмм", "isCorrect": true },
+                    { "text": "Ромб", "isCorrect": false }
+                ],
+                "hint": "Вспомните основное определение, от которого происходят названия других фигур."
+            },
+            {
+                "questionNumber": 3,
+                "question": "Один из углов параллелограмма равен $45°$. Чему равны остальные его углы?",
+                "answerOptions": [
+                    { "text": "$45°, 45°, 45°$", "isCorrect": false },
+                    { "text": "$135°, 45°, 135°$", "isCorrect": true },
+                    { "text": "$45°, 90°, 90°$", "isCorrect": false },
+                    { "text": "$135°, 135°, 135°$", "isCorrect": false }
+                ],
+                "hint": "Используйте свойства противоположных и соседних углов параллелограмма."
+            },
+            {
+                "questionNumber": 4,
+                "question": "Диагонали какого четырехугольника равны, перпендикулярны и точкой пересечения делятся пополам?",
+                "answerOptions": [
+                    { "text": "Прямоугольника", "isCorrect": false },
+                    { "text": "Ромба", "isCorrect": false },
+                    { "text": "Квадрата", "isCorrect": true },
+                    { "text": "Равнобедренной трапеции", "isCorrect": false }
+                ],
+                "hint": "Эта фигура сочетает в себе свойства и прямоугольника, и ромба."
+            },
+            {
+                "questionNumber": 5,
+                "questionType": "FREE_RESPONSE",
+                "question": "Периметр ромба равен 40 см. Чему равна его сторона (в см)?",
+                "correctAnswers": ["10"],
+                "hint": "Вспомните, что такое ромб и как связаны его стороны.",
+                "rationale": "У ромба все четыре стороны равны, поэтому периметр (40) делится на 4, что дает 10 см."
+            },
+            {
+                "questionNumber": 6,
+                "question": "Параллелограмм, у которого все углы прямые, называется...",
+                "answerOptions": [
+                    { "text": "Квадрат", "isCorrect": false },
+                    { "text": "Ромб", "isCorrect": false },
+                    { "text": "Прямоугольник", "isCorrect": true },
+                    { "text": "Трапеция", "isCorrect": false }
+                ],
+                "hint": "Название этой фигуры говорит само за себя."
+            },
+            {
+                "questionNumber": 7,
+                "questionType": "FREE_RESPONSE",
+                "question": "Периметр параллелограмма равен 48 см. Одна сторона в 3 раза больше другой. Найдите большую сторону параллелограмма (в см).",
+                "correctAnswers": ["18"],
+                "hint": "Периметр параллелограмма равен $2(a+b)$. Пусть меньшая сторона x.",
+                "rationale": "Полупериметр (сумма смежных сторон) равен $48/2 = 24$ см. Пусть одна сторона $x$, тогда другая $3x$. $x + 3x = 24 \\Rightarrow 4x = 24 \\Rightarrow x = 6$. Большая сторона равна $3x = 3 \\times 6 = 18$ см."
+            },
+            {
+                "questionNumber": 8,
+                "question": "Если в параллелограмме диагонали перпендикулярны, то этот параллелограмм является...",
+                "answerOptions": [
+                    { "text": "Прямоугольником", "isCorrect": false },
+                    { "text": "Ромбом", "isCorrect": true },
+                    { "text": "Любым параллелограммом", "isCorrect": false },
+                    { "text": "Трапецией", "isCorrect": false }
+                ],
+                "hint": "Вспомните особые свойства диагоналей разных видов параллелограммов."
+            },
+            {
+                "questionNumber": 9,
+                "question": "В равнобедренной трапеции один из углов равен $60°$. Чему равны остальные углы?",
+                "answerOptions": [
+                    { "text": "$60°, 60°, 60°$", "isCorrect": false },
+                    { "text": "$60°, 120°, 120°$", "isCorrect": true },
+                    { "text": "$60°, 90°, 150°$", "isCorrect": false },
+                    { "text": "$120°, 120°, 120°$", "isCorrect": false }
+                ],
+                "hint": "У равнобедренной трапеции углы при основаниях равны."
+            },
+            {
+                "questionNumber": 10,
+                "questionType": "FREE_RESPONSE",
+                "question": "Диагонали прямоугольника ABCD пересекаются в точке O. Найдите периметр треугольника AOB, если диагональ AC равна 14 см, а сторона AB равна 9 см.",
+                "correctAnswers": ["23"],
+                "hint": "Вспомните, какими свойствами обладают диагонали прямоугольника.",
+                "rationale": "Диагонали прямоугольника равны и точкой пересечения делятся пополам. Значит, AO = BO = 14/2 = 7 см. Периметр треугольника AOB равен AO + BO + AB = 7 + 7 + 9 = 23 см."
+            },
+            {
+                "questionNumber": 11,
+                "question": "Какое из следующих утверждений неверно?",
+                "answerOptions": [
+                    { "text": "Любой квадрат является ромбом.", "isCorrect": false },
+                    { "text": "Любой ромб является параллелограммом.", "isCorrect": false },
+                    { "text": "Любой прямоугольник является квадратом.", "isCorrect": true },
+                    { "text": "Любой квадрат является прямоугольником.", "isCorrect": false }
+                ],
+                "hint": "Подумайте о соотношении этих фигур. Является ли одна частным случаем другой?"
+            },
+            {
+                "questionNumber": 12,
+                "questionType": "FREE_RESPONSE",
+                "question": "В прямоугольной трапеции один из углов равен 130°. Найдите наименьший угол этой трапеции (в градусах).",
+                "correctAnswers": ["50"],
+                "hint": "У прямоугольной трапеции два угла прямые. Сумма углов при боковой стороне равна $180°$.",
+                "rationale": "Сумма углов при боковой стороне трапеции равна 180°. $180° - 130° = 50°$. Это и есть наименьший острый угол, так как два других угла прямые (90°)."
+            },
+            {
+                "questionNumber": 13,
+                "question": "Диагональ делит прямоугольник на два треугольника. Какого вида эти треугольники?",
+                "answerOptions": [
+                    { "text": "Равносторонние", "isCorrect": false },
+                    { "text": "Прямоугольные", "isCorrect": true },
+                    { "text": "Тупоугольные", "isCorrect": false },
+                    { "text": "Разносторонние остроугольные", "isCorrect": false }
+                ],
+                "hint": "Вспомните, какие углы у прямоугольника."
+            },
+            {
+                "questionNumber": 14,
+                "question": "Если диагонали четырехугольника точкой пересечения делятся пополам, то этот четырехугольник — ...",
+                "answerOptions": [
+                    { "text": "Трапеция", "isCorrect": false },
+                    { "text": "Ромб", "isCorrect": false },
+                    { "text": "Прямоугольник", "isCorrect": false },
+                    { "text": "Параллелограмм", "isCorrect": true }
+                ],
+                "hint": "Это ключевой признак для целого класса четырехугольников."
+            },
+            {
+                "questionNumber": 15,
+                "questionType": "FREE_RESPONSE",
+                "question": "Периметр параллелограмма равен 36 см. Одна из его сторон на 4 см больше другой. Найдите меньшую сторону параллелограмма (в см).",
+                "correctAnswers": ["7"],
+                "hint": "Периметр параллелограмма равен $2(a+b)$. Найдите сначала сумму двух смежных сторон.",
+                "rationale": "Полупериметр равен $36/2=18$ см. Если меньшая сторона $x$, то большая $x+4$. $x + (x+4) = 18 \\Rightarrow 2x = 14 \\Rightarrow x=7$ см."
+            },
+            {
+                "questionNumber": 16,
+                "questionType": "FREE_RESPONSE",
+                "question": "Сторона ромба образует с одной из его диагоналей угол 25°. Найдите больший угол ромба (в градусах).",
+                "correctAnswers": ["130"],
+                "hint": "Вспомните, чем являются диагонали для углов ромба.",
+                "rationale": "Диагонали ромба являются биссектрисами его углов, поэтому меньший угол равен $2 \\times 25° = 50°$. Сумма соседних углов в ромбе 180°, поэтому больший угол равен $180° - 50° = 130°$."
+            },
+            {
+                "questionNumber": 17,
+                "question": "В трапеции ABCD (BC || AD) угол A равен $50°$, а угол C равен $110°$. Найдите угол B и угол D.",
+                "answerOptions": [
+                    { "text": "$\\angle B=130°, \\angle D=70°$", "isCorrect": true },
+                    { "text": "$\\angle B=70°, \\angle D=130°$", "isCorrect": false },
+                    { "text": "$\\angle B=110°, \\angle D=50°$", "isCorrect": false },
+                    { "text": "$\\angle B=50°, \\angle D=110°$", "isCorrect": false }
+                ],
+                "hint": "Сумма углов, прилежащих к боковой стороне трапеции, равна $180°$."
+            },
+            {
+                "questionNumber": 18,
+                "question": "Если в четырехугольнике две стороны параллельны и равны, то этот четырехугольник — ...",
+                "answerOptions": [
+                    { "text": "Равнобедренная трапеция", "isCorrect": false },
+                    { "text": "Параллелограмм", "isCorrect": true },
+                    { "text": "Ромб", "isCorrect": false },
+                    { "text": "Дельтоид", "isCorrect": false }
+                ],
+                "hint": "Это достаточный признак, чтобы доказать принадлежность к определенному классу фигур."
+            },
+            {
+                "questionNumber": 19,
+                "question": "Высота ромба, проведенная из вершины тупого угла, делит сторону пополам. Найдите углы ромба.",
+                "answerOptions": [
+                    { "text": "$45°, 135°$", "isCorrect": false },
+                    { "text": "$30°, 150°$", "isCorrect": false },
+                    { "text": "$60°, 120°$", "isCorrect": true },
+                    { "text": "$90°, 90°$", "isCorrect": false }
+                ],
+                "hint": "Рассмотрите прямоугольный треугольник, образованный высотой. Что можно сказать об угле, если катет вдвое меньше гипотенузы?"
+            },
+            {
+                "questionNumber": 20,
+                "questionType": "FREE_RESPONSE",
+                "question": "В параллелограмме ABCD проведена биссектриса угла A, которая пересекает сторону BC в точке K. Найдите длину отрезка KC, если AB = 7 см, а BC = 10 см.",
+                "correctAnswers": ["3"],
+                "hint": "Биссектриса угла в параллелограмме отсекает от него равнобедренный треугольник.",
+                "rationale": "Углы KAD и BKA равны как накрест лежащие при BC || AD и секущей AK. Так как AK - биссектриса, то $\\angle B A K = \\angle K A D$. Следовательно, $\\angle B A K = \\angle B K A$, и треугольник ABK - равнобедренный. Значит, BK = AB = 7 см. Тогда KC = BC - BK = 10 - 7 = 3 см."
+            }
+        ];
+        
+        // --- DOM Elements ---
+        const startContainer = document.getElementById('start-container');
+        const firstNameInput = document.getElementById('first-name');
+        const lastNameInput = document.getElementById('last-name');
+        const nameError = document.getElementById('name-error');
+        const startBtn = document.getElementById('start-btn');
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const questionTextEl = document.getElementById('question-text');
+        const answerArea = document.getElementById('answer-area');
+        const nextBtn = document.getElementById('next-btn');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        const resultText = document.getElementById('result-text');
+        const hintBox = document.getElementById('hint-box');
+        const hintTextEl = document.getElementById('hint-text');
+        const timerEl = document.getElementById('timer');
+
+        const resultsContainer = document.getElementById('results-container');
+        const userNameResult = document.getElementById('user-name-result');
+        const scorePercentageEl = document.getElementById('score-percentage');
+        const scoreText = document.getElementById('score-text');
+        const gradeText = document.getElementById('grade-text');
+        const resultMessage = document.getElementById('result-message');
+        const restartBtn = document.getElementById('restart-btn');
+        const resultCircle = document.getElementById('result-circle');
+        const savingStatus = document.getElementById('saving-status');
+
+        // --- State ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let firstName = '';
+        let lastName = '';
+        let timerInterval;
+        let timeLeft;
+        const totalTime = 25 * 60; // 25 минут в секундах
+
+        // --- Functions ---
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            nextBtn.classList.add('hidden');
+            loadQuestion();
+        }
+
+        function startTimer() {
+            timeLeft = totalTime;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showResults(true);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            timerEl.textContent = `${minutes}:${seconds}`;
+            if (timeLeft <= 30 && timeLeft > 0) { 
+                 timerEl.classList.add('text-red-500');
+            } else {
+                 timerEl.classList.remove('text-red-500');
+            }
+        }
+
+        function renderMath() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                  {left: '$$', right: '$$', display: true},
+                  {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+            });
+        }
+
+        function loadQuestion() {
+            resultText.textContent = '';
+            resultText.classList.remove('bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700');
+            hintBox.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionTextEl.innerHTML = currentQuestion.question;
+            progressText.textContent = `Вопрос ${currentQuestionIndex + 1} из ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / quizData.length) * 100}%`;
+            answerArea.innerHTML = '';
+
+            if (currentQuestion.questionType === 'FREE_RESPONSE') {
+                answerArea.classList.remove('md:grid-cols-2');
+                answerArea.innerHTML = `
+                    <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
+                        <input type="text" id="free-response-input" class="w-full sm:w-auto flex-grow text-center text-lg border-2 border-slate-300 rounded-lg p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Введите ответ">
+                        <button id="submit-btn" class="w-full sm:w-auto bg-slate-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-800 transition-colors">Ответить</button>
+                    </div>
+                `;
+                const input = document.getElementById('free-response-input');
+                const submitBtn = document.getElementById('submit-btn');
+                
+                submitBtn.addEventListener('click', checkFreeResponseAnswer);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') checkFreeResponseAnswer();
+                });
+
+            } else {
+                answerArea.classList.add('md:grid-cols-2');
+                shuffleArray(currentQuestion.answerOptions);
+                currentQuestion.answerOptions.forEach(option => {
+                    const button = document.createElement('button');
+                    button.innerHTML = option.text;
+                    button.classList.add('w-full', 'text-left', 'p-4', 'border', 'border-slate-300', 'rounded-lg', 'hover:bg-slate-100', 'hover:border-blue-500', 'transition-colors', 'duration-200');
+                    button.addEventListener('click', () => selectAnswer(button, option));
+                    answerArea.appendChild(button);
+                });
+            }
+            renderMath();
+        }
+
+        function selectAnswer(button, option) {
+            disableAnswers();
+            if (option.isCorrect) {
+                score++;
+                button.classList.add('bg-green-100', 'border-green-500');
+                resultText.textContent = 'Правильно!';
+                resultText.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                button.classList.add('bg-red-100', 'border-red-500');
+                resultText.textContent = 'Неправильно!';
+                resultText.classList.add('bg-red-100', 'text-red-700');
+                const correctButton = Array.from(answerArea.children).find((btn, index) => {
+                    const originalOption = quizData[currentQuestionIndex].answerOptions.find(o => o.text === btn.innerHTML);
+                    return originalOption && originalOption.isCorrect;
+                });
+                if (correctButton) {
+                    correctButton.classList.add('bg-green-100', 'border-green-500');
+                }
+            }
+            nextBtn.classList.remove('hidden');
+        }
+
+
+        function checkFreeResponseAnswer() {
+            const input = document.getElementById('free-response-input');
+            const userAnswer = input.value.trim();
+            if (userAnswer === '') return;
+            disableAnswers();
+
+            const currentQuestion = quizData[currentQuestionIndex];
+            if (currentQuestion.correctAnswers.includes(userAnswer)) {
+                score++;
+                input.classList.add('bg-green-100', 'border-green-500');
+                resultText.textContent = 'Правильно!';
+                resultText.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                input.classList.add('bg-red-100', 'border-red-500');
+                resultText.innerHTML = `Неправильно! <br class="sm:hidden"> Верный ответ: <strong>${currentQuestion.correctAnswers[0]}</strong>`;
+                resultText.classList.add('bg-red-100', 'text-red-700');
+            }
+            renderMath();
+            nextBtn.classList.remove('hidden');
+        }
+        
+        function disableAnswers() {
+            Array.from(answerArea.children).forEach(child => {
+                if (child.tagName === 'BUTTON') {
+                    child.disabled = true;
+                    child.classList.add('cursor-not-allowed');
+                } else {
+                    const input = child.querySelector('input');
+                    const btn = child.querySelector('button');
+                    if(input) input.disabled = true;
+                    if(btn) btn.disabled = true;
+                }
+            });
+
+            const currentQuestion = quizData[currentQuestionIndex];
+            if (currentQuestion.hint) {
+                hintTextEl.textContent = currentQuestion.hint;
+                hintBox.classList.remove('hidden');
+            }
+        }
+        
+        async function sendResultsToGoogleSheet(resultData) {
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === '') {
+                console.warn('Google Script URL не указан. Результаты не будут сохранены.');
+                savingStatus.textContent = 'URL для сохранения не настроен.';
+                savingStatus.classList.add('text-yellow-600');
+                return;
+            }
+            
+            savingStatus.textContent = 'Сохранение результатов...';
+            savingStatus.classList.remove('text-green-600', 'text-red-600', 'text-yellow-600');
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    // Используем text/plain, чтобы избежать CORS preflight запроса,
+                    // скрипт Google все равно сможет его распарсить.
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify(resultData)
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    console.log('Результаты успешно отправлены');
+                    savingStatus.textContent = 'Результаты сохранены!';
+                    savingStatus.classList.add('text-green-600');
+                } else {
+                    console.error('Ошибка от скрипта:', result.message);
+                    savingStatus.textContent = 'Ошибка сохранения (ответ сервера).';
+                    savingStatus.classList.add('text-red-600');
+                }
+            } catch (error) {
+                 console.error('Ошибка при отправке результатов (сетевая ошибка):', error);
+                 savingStatus.textContent = 'Ошибка сохранения (ошибка сети).';
+                 savingStatus.classList.add('text-red-600');
+            }
+        }
+
+
+        function showResults(isTimeUp = false) {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            restartBtn.classList.remove('hidden');
+            
+            userNameResult.textContent = `Результат для: ${firstName} ${lastName}`;
+            scoreText.textContent = `${score}/${quizData.length}`;
+
+            const percentage = Math.round((score / quizData.length) * 100);
+            scorePercentageEl.textContent = `${percentage}%`;
+            resultCircle.style.strokeDasharray = `${percentage}, 100`;
+
+            let grade = 2;
+            let gradeColor = 'text-red-500';
+
+            if(isTimeUp) {
+                resultMessage.textContent = "К сожалению, время вышло.";
+            } else {
+                if (percentage >= 90) { // 18-20 correct
+                    grade = 5;
+                    gradeColor = 'text-green-500';
+                    resultMessage.textContent = "Отлично! Вы настоящий знаток геометрии!";
+                } else if (percentage >= 75) { // 15-17 correct
+                    grade = 4;
+                    gradeColor = 'text-blue-600';
+                    resultMessage.textContent = "Хороший результат! Вы хорошо знаете тему.";
+                } else if (percentage >= 50) { // 10-14 correct
+                    grade = 3;
+                    gradeColor = 'text-yellow-500';
+                     resultMessage.textContent = "Неплохо, но стоит повторить некоторые моменты.";
+                } else {
+                     resultMessage.textContent = "Нужно еще поработать над этой темой.";
+                }
+            }
+            
+            if (grade > 2) {
+                restartBtn.classList.add('hidden');
+            }
+
+            gradeText.textContent = grade;
+            gradeText.className = `text-3xl font-bold ${gradeColor}`;
+            resultCircle.className = `stroke-current ${gradeColor} transition-all duration-1000`;
+            
+            const resultData = {
+                firstName: firstName,
+                lastName: lastName,
+                score: score,
+                totalQuestions: quizData.length,
+                percentage: percentage,
+                grade: grade
+            };
+
+            sendResultsToGoogleSheet(resultData);
+        }
+
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', () => {
+            firstName = firstNameInput.value.trim();
+            lastName = lastNameInput.value.trim();
+            if (firstName === '' || lastName === '') {
+                nameError.classList.remove('hidden');
+            } else {
+                nameError.classList.add('hidden');
+                startContainer.classList.add('hidden');
+                quizContainer.classList.remove('hidden');
+                shuffleArray(quizData);
+                startTimer();
+                startQuiz();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                clearInterval(timerInterval);
+                showResults();
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            resultsContainer.classList.add('hidden');
+            startContainer.classList.remove('hidden');
+            firstNameInput.value = '';
+            lastNameInput.value = '';
+        });
+
+    });
+</script>
+
+</body>
+</html>
+
